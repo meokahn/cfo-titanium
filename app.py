@@ -40,22 +40,24 @@ h1, h2, h3 { color: #ffffff !important; font-family: 'SF Pro Display', -apple-sy
 """, unsafe_allow_html=True)
 
 # --- 2. CONNESSIONE AL DATABASE (API) ---
-scope = [
-"https://www.googleapis.com/auth/spreadsheets",
-"https://www.googleapis.com/auth/drive"
-]
+scope = ["https://www.googleapis.com/auth/spreadsheets"]
 
-@st.cache_resource
-def get_gspread_client():
-creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
-return gspread.authorize(creds)
+creds = Credentials.from_service_account_info(
+st.secrets["gcp_service_account"],
+scopes=scope
+)
+client = gspread.authorize(creds)
 
+# Se il 403 persiste, prova ad aprire il file tramite URL invece che per nome
 try:
-client = get_gspread_client()
-# Apri il foglio (Assicurati che il nome su Google Drive sia ESATTAMENTE questo)
-sh = client.open("CFO_2026_DATABASE")
-sheet_saldi = sh.worksheet("Tabella saldi")
-sheet_live = sh.worksheet("Live_Mese")
+# Sostituisci qui l'ID del tuo foglio (lo trovi nell'URL del browser tra /d/ e /edit)
+ID_FOGLIO = "1lR0XG8uT3C-7_887_ECC_ECC"
+kb = client.open_by_key(ID_FOGLIO)
+sheet_saldi = kb.worksheet("Tabella saldi")
+sheet_live = kb.worksheet("Live_Mese")
+except Exception as e:
+st.error(f"Errore: {e}")
+
 
 # --- 3. RECUPERO DATI REALI ---
 # Saldo Principale (B2) e Budget Extra (B3)
